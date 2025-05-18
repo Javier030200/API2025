@@ -1,32 +1,47 @@
 import { commysql } from '../bd.js';
-import bcrypt from 'bcryptjs'
 import { generarToken } from '../helpers/generarToken.js'
 
 
 // Iniciar sesion con autenticación
+import { generarToken } from '../helpers/generarToken.js'
+
 export const iniciarSesion = async (req, res) => {
-    const { correo, clave } = req.body
+    const { correo, clave } = req.body;
 
     try {
-        const [usuarios] = await commysql.query('SELECT * FROM usuarios WHERE usr_correo = ?', [correo])
+        const [usuarios] = await commysql.query(
+            'SELECT * FROM usuarios WHERE usr_correo = ?',
+            [correo]
+        );
 
         if (usuarios.length === 0) {
-            return res.status(404).json({ mensaje: 'Usuario no encontrado' })
+            return res.status(404).json({ mensaje: 'Usuario no encontrado' });
         }
 
-        const usuario = usuarios[0]
+        const usuario = usuarios[0];
 
-        if (clave !== usuario.usr_clave) {
-            return res.status(401).json({ mensaje: 'Clave incorrecta' })
+        // Comparar directamente las claves sin encriptar
+        if (usuario.usr_clave !== clave) {
+            return res.status(401).json({ mensaje: 'Clave incorrecta' });
         }
 
-        const token = generarToken(usuario)
+        // Generar el token
+        const token = generarToken(usuario);
 
-        res.json({ mensaje: 'Inicio de sesión exitoso', token })
+        res.json({
+            mensaje: 'Inicio de sesión exitoso',
+            token,
+            usuario: {
+                id: usuario.usr_id,
+                nombre: usuario.usr_nombre,
+                correo: usuario.usr_correo
+            }
+        });
     } catch (error) {
-        res.status(500).json({ mensaje: 'Error en el servidor', error })
+        console.error('Error en iniciarSesion:', error);
+        res.status(500).json({ mensaje: 'Error en el servidor' });
     }
-}
+};
 
 // Obtener un usuario por ID
 export const getUsuariosxid = async (req, res) => {
