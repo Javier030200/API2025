@@ -1,5 +1,8 @@
 import { commysql } from '../bd.js';
+import bcrypt from 'bcryptjs'
 import { generarToken } from '../helpers/generarToken.js'
+
+
 
 // Iniciar sesion con autenticación
 export const iniciarSesion = async (req, res) => {
@@ -37,6 +40,16 @@ export const iniciarSesion = async (req, res) => {
     } catch (error) {
         console.error('Error en iniciarSesion:', error);
         res.status(500).json({ mensaje: 'Error en el servidor' });
+    }
+};
+
+// Obtener todos los usuarios
+export const getUsuarios = async (req, res) => {
+    try {
+        const [result] = await commysql.query('SELECT * FROM usuarios');
+        res.json({ cant: result.length, data: result });
+    } catch (error) {
+        return res.status(500).json({ message: "Error en el servidor" });
     }
 };
 
