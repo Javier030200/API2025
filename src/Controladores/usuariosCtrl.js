@@ -1,10 +1,7 @@
 import { commysql } from '../bd.js';
 import { generarToken } from '../helpers/generarToken.js'
 
-
 // Iniciar sesion con autenticación
-import { generarToken } from '../helpers/generarToken.js'
-
 export const iniciarSesion = async (req, res) => {
     const { correo, clave } = req.body;
 
