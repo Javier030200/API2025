@@ -5,10 +5,13 @@ import {
     postUsuarios,
     putUsuarios,
     patchUsuarios,
-    deleteUsuarios
+    deleteUsuarios,
+    iniciarSesion
 } from "../Controladores/usuariosCtrl.js";
+import { verificarToken } from '../middleware/verificarToken.js'
 
 const router = express.Router();
+router.post('/login', iniciarSesion);
 
 router.get('/usuarios', getUsuarios);
 router.get('/usuarios/:id', getUsuariosxid);
