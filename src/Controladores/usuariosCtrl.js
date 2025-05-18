@@ -8,11 +8,16 @@ import { generarToken } from '../helpers/generarToken.js'
 export const iniciarSesion = async (req, res) => {
     const { correo, clave } = req.body;
 
+    console.log('Datos login recibidos:', req.body);
+
     try {
+        const correoLimpio = correo.trim();
         const [usuarios] = await commysql.query(
             'SELECT * FROM usuarios WHERE usr_correo = ?',
-            [correo]
+            [correoLimpio]
         );
+
+        console.log('Usuarios encontrados:', usuarios);
 
         if (usuarios.length === 0) {
             return res.status(404).json({ mensaje: 'Usuario no encontrado' });
@@ -20,10 +25,7 @@ export const iniciarSesion = async (req, res) => {
 
         const usuario = usuarios[0];
 
-        // Calcular hash MD5 de la clave enviada
-        const claveHash = crypto.createHash('md5').update(clave).digest('hex');
-
-        if (usuario.usr_clave !== claveHash) {
+        if (usuario.usr_clave !== clave) {
             return res.status(401).json({ mensaje: 'Clave incorrecta' });
         }
 
@@ -43,6 +45,9 @@ export const iniciarSesion = async (req, res) => {
         res.status(500).json({ mensaje: 'Error en el servidor' });
     }
 };
+
+
+
 // Obtener todos los usuarios
 export const getUsuarios = async (req, res) => {
     try {
