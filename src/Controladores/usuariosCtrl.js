@@ -15,9 +15,8 @@ export const iniciarSesion = async (req, res) => {
         }
 
         const usuario = usuarios[0]
-        const claveValida = await bcrypt.compare(clave, usuario.clave)
 
-        if (!claveValida) {
+        if (clave !== usuario.usr_clave) {
             return res.status(401).json({ mensaje: 'Clave incorrecta' })
         }
 
@@ -25,19 +24,9 @@ export const iniciarSesion = async (req, res) => {
 
         res.json({ mensaje: 'Inicio de sesión exitoso', token })
     } catch (error) {
-        res.status(500).json({ mensaje: 'Error en el servidor' })
+        res.status(500).json({ mensaje: 'Error en el servidor', error })
     }
 }
-
-// Obtener todos los usuarios
-export const getUsuarios = async (req, res) => {
-    try {
-        const [result] = await commysql.query('SELECT * FROM usuarios');
-        res.json({ cant: result.length, data: result });
-    } catch (error) {
-        return res.status(500).json({ message: "Error en el servidor" });
-    }
-};
 
 // Obtener un usuario por ID
 export const getUsuariosxid = async (req, res) => {
