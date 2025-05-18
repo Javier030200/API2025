@@ -11,7 +11,7 @@ import {
 import { verificarToken } from '../middleware/verificarToken.js'
 
 const router = express.Router();
-router.post('/login', iniciarSesion);
+router.post('/usuarios/login', iniciarSesion);
 
 router.get('/usuarios', getUsuarios);
 router.get('/usuarios/:id', getUsuariosxid);
