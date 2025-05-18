@@ -8,16 +8,17 @@ import { generarToken } from '../helpers/generarToken.js'
 export const iniciarSesion = async (req, res) => {
     const { correo, clave } = req.body;
 
-    console.log('Datos login recibidos:', req.body);
-
+    console.log('Datos login recibidos:', req.body); // Muestra lo que llegó
     try {
-        const correoLimpio = correo.trim();
+        const correoLimpio = correo.trim().toLowerCase();
+        console.log('Correo limpio:', correoLimpio); // Debug del correo limpio
+
         const [usuarios] = await commysql.query(
             'SELECT * FROM usuarios WHERE usr_correo = ?',
             [correoLimpio]
         );
 
-        console.log('Usuarios encontrados:', usuarios);
+        console.log('Usuarios encontrados:', usuarios); // ¿Se encontró el usuario?
 
         if (usuarios.length === 0) {
             return res.status(404).json({ mensaje: 'Usuario no encontrado' });
@@ -25,7 +26,8 @@ export const iniciarSesion = async (req, res) => {
 
         const usuario = usuarios[0];
 
-        if (usuario.usr_clave !== clave) {
+        const claveValida = await bcrypt.compare(clave, usuario.usr_clave);
+        if (!claveValida) {
             return res.status(401).json({ mensaje: 'Clave incorrecta' });
         }
 
@@ -73,16 +75,37 @@ export const getUsuariosxid = async (req, res) => {
 export const postUsuarios = async (req, res) => {
     try {
         const { usr_usuario, usr_clave, usr_nombre, usr_telefono, usr_correo, usr_activo } = req.body;
+
+        // Verifica si ya existe un usuario con el mismo correo
+        const [usuariosExistentes] = await commysql.query(
+            'SELECT * FROM usuarios WHERE usr_correo = ?',
+            [usr_correo.trim()]
+        );
+
+        if (usuariosExistentes.length > 0) {
+            return res.status(400).json({ mensaje: "Ya existe un usuario con este correo" });
+        }
+
+        // Hashear la clave antes de guardarla
+        const salt = await bcrypt.genSalt(10);
+        const claveHasheada = await bcrypt.hash(usr_clave, salt);
+
         const [result] = await commysql.query(
             `INSERT INTO usuarios (usr_usuario, usr_clave, usr_nombre, usr_telefono, usr_correo, usr_activo)
             VALUES (?, ?, ?, ?, ?, ?)`,
-            [usr_usuario, usr_clave, usr_nombre, usr_telefono, usr_correo, usr_activo]
+            [usr_usuario, claveHasheada, usr_nombre, usr_telefono, usr_correo.trim(), usr_activo]
         );
-        res.send({ id: result.insertId });
+
+        res.status(201).json({
+            mensaje: "Usuario creado correctamente",
+            id: result.insertId
+        });
     } catch (error) {
-        return res.status(500).json({ message: "Error al insertar usuario" });
+        console.error('Error al insertar usuario:', error);
+        return res.status(500).json({ mensaje: "Error al insertar usuario" });
     }
 };
+
 
 // Actualizar todos los campos de un usuario
 export const putUsuarios = async (req, res) => {

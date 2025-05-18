@@ -13,7 +13,7 @@ import { verificarToken } from '../middleware/verificarToken.js'
 const router = express.Router();
 router.post('/usuarios/login', iniciarSesion);
 
-router.get('/usuarios', getUsuarios);
+router.get('/usuarios', verificarToken, getUsuarios);
 router.get('/usuarios/:id', getUsuariosxid);
 router.post('/usuarios', postUsuarios);
 router.put('/usuarios/:id', putUsuarios);
