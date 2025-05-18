@@ -1,10 +1,10 @@
 import { commysql } from '../bd.js';
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto';
 import { generarToken } from '../helpers/generarToken.js'
 
 
-
-// Iniciar sesion con autenticación
+//Iniciar Sesion
 export const iniciarSesion = async (req, res) => {
     const { correo, clave } = req.body;
 
@@ -20,12 +20,13 @@ export const iniciarSesion = async (req, res) => {
 
         const usuario = usuarios[0];
 
-        // Comparar directamente las claves sin encriptar
-        if (usuario.usr_clave !== clave) {
+        // Calcular hash MD5 de la clave enviada
+        const claveHash = crypto.createHash('md5').update(clave).digest('hex');
+
+        if (usuario.usr_clave !== claveHash) {
             return res.status(401).json({ mensaje: 'Clave incorrecta' });
         }
 
-        // Generar el token
         const token = generarToken(usuario);
 
         res.json({
@@ -42,7 +43,6 @@ export const iniciarSesion = async (req, res) => {
         res.status(500).json({ mensaje: 'Error en el servidor' });
     }
 };
-
 // Obtener todos los usuarios
 export const getUsuarios = async (req, res) => {
     try {
