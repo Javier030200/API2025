@@ -20,7 +20,7 @@ export const getClientesxid=async(req,res)=>{
         
         const [result]=await  commysql.query(' select *from clientes where cli_id=?', [req.params.id])
         if(result.length<=0) return res.status(400).json({
-            cli_id:0,
+            id:0,
             message: " Cliente no encontrado"
         })
         res.json(result[0])
