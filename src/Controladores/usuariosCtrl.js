@@ -7,32 +7,21 @@ import { generarToken } from '../helpers/generarToken.js'
 //Iniciar Sesion
 export const iniciarSesion = async (req, res) => {
     const { correo, clave } = req.body;
-
-    console.log('Datos login recibidos:', req.body); // Muestra lo que llegó
     try {
-        const correoLimpio = correo.trim().toLowerCase();
-        console.log('Correo limpio:', correoLimpio); // Debug del correo limpio
-
+        const correoLimpio = correo.trim().toLowerCase(); //elimina espacios y lo convierte a minúscula
         const [usuarios] = await commysql.query(
             'SELECT * FROM usuarios WHERE usr_correo = ?',
             [correoLimpio]
         );
-
-        console.log('Usuarios encontrados:', usuarios); // ¿Se encontró el usuario?
-
         if (usuarios.length === 0) {
             return res.status(404).json({ mensaje: 'Usuario no encontrado' });
         }
-
         const usuario = usuarios[0];
-
         const claveValida = await bcrypt.compare(clave, usuario.usr_clave);
         if (!claveValida) {
             return res.status(401).json({ mensaje: 'Clave incorrecta' });
         }
-
         const token = generarToken(usuario);
-
         res.json({
             mensaje: 'Inicio de sesión exitoso',
             token,
@@ -95,7 +84,6 @@ export const postUsuarios = async (req, res) => {
             VALUES (?, ?, ?, ?, ?, ?)`,
             [usr_usuario, claveHasheada, usr_nombre, usr_telefono, usr_correo.trim(), usr_activo]
         );
-
         res.status(201).json({
             mensaje: "Usuario creado correctamente",
             id: result.insertId

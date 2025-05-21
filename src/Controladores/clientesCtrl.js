@@ -37,7 +37,7 @@ export const postClientes = async (req, res) => {
         const [result] = await commysql.query("INSERT INTO clientes(cli_identificacion, cli_nombre, cli_telefono, cli_correo, cli_direccion, cli_pais, cli_ciudad) VALUES (?,?,?,?,?,?,?)",
             [cli_identificacion, cli_nombre, cli_telefono, cli_correo, cli_direccion, cli_pais, cli_ciudad]);
         res.send({
-            id: result.insertId
+            cli_id: result.insertId
         });
     } catch (error) {
         console.error(error); // Verifica el error completo
